@@ -2,17 +2,20 @@
 <link href="./style.css" rel="stylesheet" />
 
 <body>
-    <canvas id="gameCanvas" style="border: 10px solid black;" width="1600" height="800"></canvas>
+    <canvas id="gameCanvas" style="border: 10px solid black;" width="1000" height="800"></canvas>
 </body>
 <script>
 
-    async function main() {
-        let canvas = document.getElementById("gameCanvas");
+    let canvas = document.getElementById("gameCanvas");
+
+    async function bird() {
         let ctx = canvas.getContext("2d");
 
+        // bird logic
         let y = 0;
         let yVelocity = 0;
         let yAcc = 9.8;
+        let yLowerLast = 700
 
         document.onkeydown = function () {
             yVelocity = -50;
@@ -23,17 +26,66 @@
 
             yVelocity = yVelocity + 0.33 * yAcc;
             y = y + yVelocity * 0.33;
-            ctx.clearRect(0, 0, 1600, 900);
-            ctx.beginPath();
-            ctx.rect(10, y, 100, 100);
-            ctx.fill();
+
+
+            if (yLowerLast > y) {
+                ctx.beginPath();
+                ctx.rect(10, y, 100, 100);
+                ctx.fill();
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                y = 0;
+                alert("you lost")
+            }
+            // ctx.clearRect(0, 0, canvas.width, canvas.height);
+
 
             await new Promise(resolve => setTimeout(resolve, 50));
         }
+    }
 
-        // ctx.beginPath();
-        // ctx.rect(10, 20, 150, 100);
-        // ctx.fill();
+    function walls() {
+
+        //render a wall
+        async function wall(height) {
+
+            console.log("loading")
+            let ctx = canvas.getContext("2d");
+            let x = 0;
+            let xWallStart = 500;
+            let xWallVelocity = 20;
+
+
+            for (let i = 0; i < 10000000; i++) {
+                //render top walls
+
+                x = xWallStart - xWallVelocity * i;
+
+                console.log("abdc", x)
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                ctx.rect(x, 0, 150, height);
+                ctx.fill();
+
+                //render down walls
+
+                // ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                ctx.rect(x, 400, 150, height + 1000);
+                ctx.fill();
+
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+
+        }
+        //render walls with different values passing parameters
+        wall(100);
+    }
+
+    function main() {
+        walls();
+        bird();
     }
     main();
 

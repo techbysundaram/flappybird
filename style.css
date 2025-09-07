@@ -1,5 +1,10 @@
-#bird{
-    position: absolute; 
+#bird {
+    position: absolute;
     top: 20px;
-    left: 200px
+    left: 200px;
+}
+
+#gameCanvas {
+    width: "1000px";
+    height: "800px",
 }
