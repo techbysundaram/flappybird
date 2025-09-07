@@ -1,0 +1,42 @@
+<html>
+<link href="./style.css" rel="stylesheet" />
+
+<body>
+    <canvas id="gameCanvas" style="border: 10px solid black;" width="1600" height="800"></canvas>
+</body>
+<script>
+
+    async function main() {
+        let canvas = document.getElementById("gameCanvas");
+        let ctx = canvas.getContext("2d");
+
+        let y = 0;
+        let yVelocity = 0;
+        let yAcc = 9.8;
+
+        document.onkeydown = function () {
+            yVelocity = -50;
+        }
+
+        for (let i = 0; i < 10000000; i++) {
+            console.log("abdc")
+
+            yVelocity = yVelocity + 0.33 * yAcc;
+            y = y + yVelocity * 0.33;
+            ctx.clearRect(0, 0, 1600, 900);
+            ctx.beginPath();
+            ctx.rect(10, y, 100, 100);
+            ctx.fill();
+
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
+
+        // ctx.beginPath();
+        // ctx.rect(10, 20, 150, 100);
+        // ctx.fill();
+    }
+    main();
+
+</script>
+
+</html>
