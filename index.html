@@ -5,90 +5,97 @@
     <canvas id="gameCanvas" style="border: 10px solid black;" width="1000" height="800"></canvas>
 </body>
 <script>
-
     let canvas = document.getElementById("gameCanvas");
+    let ctx = canvas.getContext("2d");
 
-    async function bird() {
-        let ctx = canvas.getContext("2d");
+    // Bird state
+    let birdY = 200;
+    let birdVelocity = 0;
+    let gravity = 0.5;
+    let birdSize = 40;
 
-        // bird logic
-        let y = 0;
-        let yVelocity = 0;
-        let yAcc = 9.8;
-        let yLowerLast = 700
+    // Walls state
+    let wallX = canvas.width;
+    let wallWidth = 100;
+    let gapHeight = 200;
+    let wallHeight = Math.floor(Math.random() * 300) + 100;
+    let wallSpeed = 5;
 
-        document.onkeydown = function () {
-            yVelocity = -50;
-        }
+    // Key input
+    document.onkeydown = function () {
+        birdVelocity = -10; // jump
+    };
 
-        for (let i = 0; i < 10000000; i++) {
-            console.log("abdc")
+    function resetWalls() {
+        wallX = canvas.width;
+        wallHeight = Math.floor(Math.random() * 300) + 100;
+    }
 
-            yVelocity = yVelocity + 0.33 * yAcc;
-            y = y + yVelocity * 0.33;
+    function updateBird() {
+        birdVelocity += gravity;
+        birdY += birdVelocity;
 
-
-            if (yLowerLast > y) {
-                ctx.beginPath();
-                ctx.rect(10, y, 100, 100);
-                ctx.fill();
-            } else {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                y = 0;
-                alert("you lost")
-            }
-            // ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-
-            await new Promise(resolve => setTimeout(resolve, 50));
+        // ground or ceiling check
+        if (birdY + birdSize > canvas.height || birdY < 0) {
+            gameOver();
         }
     }
 
-    function walls() {
-
-        //render a wall
-        async function wall(height) {
-
-            console.log("loading")
-            let ctx = canvas.getContext("2d");
-            let x = 0;
-            let xWallStart = 500;
-            let xWallVelocity = 20;
-
-
-            for (let i = 0; i < 10000000; i++) {
-                //render top walls
-
-                x = xWallStart - xWallVelocity * i;
-
-                console.log("abdc", x)
-
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.beginPath();
-                ctx.rect(x, 0, 150, height);
-                ctx.fill();
-
-                //render down walls
-
-                // ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.beginPath();
-                ctx.rect(x, 400, 150, height + 1000);
-                ctx.fill();
-
-                await new Promise(resolve => setTimeout(resolve, 50));
-            }
-
+    function updateWalls() {
+        wallX -= wallSpeed;
+        if ((wallX + wallWidth)/2 < 0) {
+            resetWalls();
         }
-        //render walls with different values passing parameters
-        wall(100);
+    }
+
+    function checkCollision() {
+        // bird hitting walls
+        if (
+            wallX < 60 && wallX + wallWidth > 20 // horizontal overlap
+        ) {
+            if (
+                birdY < wallHeight || birdY + birdSize > wallHeight + gapHeight
+            ) {
+                gameOver();
+            }
+        }
+    }
+
+    function drawBird() {
+        ctx.fillStyle = "blue";
+        ctx.fillRect(20, birdY, birdSize, birdSize);
+    }
+
+    function drawWalls() {
+        ctx.fillStyle = "green";
+        // top wall
+        ctx.fillRect(wallX, 0, wallWidth, wallHeight);
+        // bottom wall
+        ctx.fillRect(wallX, wallHeight + gapHeight, wallWidth, canvas.height);
+    }
+
+    function gameOver() {
+        alert("You Lost!");
+        document.location.reload();
+    }
+
+    function gameLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        updateBird();
+        updateWalls();
+        checkCollision();
+
+        drawBird();
+        drawWalls();
+
+        requestAnimationFrame(gameLoop);
     }
 
     function main() {
-        walls();
-        bird();
+        gameLoop();
     }
+
     main();
-
 </script>
-
 </html>
