@@ -14,21 +14,24 @@
     let gravity = 0.5;
     let birdSize = 40;
 
-    // Walls state
-    let wallX = canvas.width;
+    // Walls state (multiple)
+    let walls = [];
     let wallWidth = 100;
     let gapHeight = 200;
-    let wallHeight = Math.floor(Math.random() * 300) + 100;
     let wallSpeed = 5;
+    let wallSpacing = 300; // distance between walls
 
     // Key input
     document.onkeydown = function () {
         birdVelocity = -10; // jump
     };
 
-    function resetWalls() {
-        wallX = canvas.width;
-        wallHeight = Math.floor(Math.random() * 300) + 100;
+    function addWall(startX) {
+        let wallHeight = Math.floor(Math.random() * 300) + 100;
+        walls.push({
+            x: startX,
+            height: wallHeight
+        });
     }
 
     function updateBird() {
@@ -42,21 +45,32 @@
     }
 
     function updateWalls() {
-        wallX -= wallSpeed;
-        if ((wallX + wallWidth)/2 < 0) {
-            resetWalls();
+        for (let wall of walls) {
+            wall.x -= wallSpeed;
+        }
+
+        // remove walls that go off screen
+        if (walls.length && walls[0].x + wallWidth < 0) {
+            walls.shift();
+        }
+
+        // add new wall if last one is far enough
+        if (walls[walls.length - 1].x < canvas.width - wallSpacing) {
+            addWall(canvas.width);
         }
     }
 
     function checkCollision() {
-        // bird hitting walls
-        if (
-            wallX < 60 && wallX + wallWidth > 20 // horizontal overlap
-        ) {
+        for (let wall of walls) {
             if (
-                birdY < wallHeight || birdY + birdSize > wallHeight + gapHeight
+                wall.x < 60 && wall.x + wallWidth > 20 // horizontal overlap
             ) {
-                gameOver();
+                if (
+                    birdY < wall.height ||
+                    birdY + birdSize > wall.height + gapHeight
+                ) {
+                    gameOver();
+                }
             }
         }
     }
@@ -68,10 +82,12 @@
 
     function drawWalls() {
         ctx.fillStyle = "green";
-        // top wall
-        ctx.fillRect(wallX, 0, wallWidth, wallHeight);
-        // bottom wall
-        ctx.fillRect(wallX, wallHeight + gapHeight, wallWidth, canvas.height);
+        for (let wall of walls) {
+            // top wall
+            ctx.fillRect(wall.x, 0, wallWidth, wall.height);
+            // bottom wall
+            ctx.fillRect(wall.x, wall.height + gapHeight, wallWidth, canvas.height);
+        }
     }
 
     function gameOver() {
@@ -93,6 +109,9 @@
     }
 
     function main() {
+        // start with a couple of walls
+        addWall(canvas.width);
+        addWall(canvas.width + wallSpacing);
         gameLoop();
     }
 
